@@ -8,46 +8,48 @@
   :root{
     --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --border:#283040;
     --txt:#e6edf3; --muted:#9aa7b4; --accent:#58a6ff; --accent2:#3fb950;
-    --warn:#f0883e; --danger:#f85149; --grid:#222b38; --plot:#0a0e14;
+    --warn:#f0883e; --danger:#f85149; --plot:#0a0e14;
   }
   *{box-sizing:border-box;}
-  body{
-    margin:0; background:var(--bg); color:var(--txt);
-    font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
-    font-size:14px; line-height:1.5;
-  }
-  header{
-    padding:18px 24px; border-bottom:1px solid var(--border);
-    background:linear-gradient(180deg,#11161f,#0d1117);
-  }
+  body{margin:0; background:var(--bg); color:var(--txt);
+    font-family:"Segoe UI",system-ui,-apple-system,sans-serif; font-size:14px; line-height:1.5;}
+  header{padding:18px 24px; border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,#11161f,#0d1117);}
   header h1{margin:0; font-size:20px; font-weight:600;}
   header p{margin:4px 0 0; color:var(--muted); font-size:13px;}
   .eq{color:var(--accent); font-family:"Cascadia Code",Consolas,monospace;}
-  .wrap{display:grid; grid-template-columns:300px 1fr; gap:16px; padding:16px; max-width:1500px; margin:0 auto;}
+  .wrap{display:grid; grid-template-columns:320px 1fr; gap:16px; padding:16px; max-width:1520px; margin:0 auto;}
   @media(max-width:900px){.wrap{grid-template-columns:1fr;}}
 
   .panel{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px;}
-  .panel h2{margin:0 0 14px; font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted);}
+  .panel h2{margin:0 0 14px; font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted);
+    display:flex; align-items:center; gap:8px;}
+  .panel h2::after{content:""; flex:1; height:1px; background:var(--border);}
 
-  /* Controls */
-  .ctrl{margin-bottom:18px;}
-  .ctrl label{display:flex; justify-content:space-between; margin-bottom:6px; font-weight:500;}
-  .ctrl label .val{color:var(--accent); font-family:Consolas,monospace;}
-  input[type=range]{width:100%; accent-color:var(--accent); cursor:pointer;}
-  .seg{display:flex; gap:6px; margin-top:6px;}
-  .seg button{
-    flex:1; padding:7px; background:var(--panel2); border:1px solid var(--border);
-    color:var(--muted); border-radius:7px; cursor:pointer; font-size:12px;
-  }
+  /* Editable fields: label + number box + full-width slider */
+  .field{margin-bottom:13px;}
+  .field .top{display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;}
+  .field .top label{font-weight:500;}
+  .field .top label .u{color:var(--muted); font-size:11px; font-weight:400;}
+  input[type=number]{width:82px; background:var(--panel2); border:1px solid var(--border); color:var(--accent);
+    border-radius:6px; padding:5px 7px; font-family:Consolas,monospace; font-size:13px; text-align:right;}
+  input[type=number]:focus{outline:none; border-color:var(--accent);}
+  input[type=range]{width:100%; accent-color:var(--accent); cursor:pointer; margin:0;}
+
+  .seg{display:flex; gap:6px;}
+  .seg button{flex:1; padding:7px 4px; background:var(--panel2); border:1px solid var(--border);
+    color:var(--muted); border-radius:7px; cursor:pointer; font-size:12px;}
   .seg button.active{background:var(--accent); color:#04121f; border-color:var(--accent); font-weight:600;}
-  .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
-  .playbtn{width:100%; padding:9px; margin-top:6px; background:var(--accent2); color:#04140a;
-           border:none; border-radius:7px; font-weight:600; cursor:pointer; font-size:13px;}
-  .playbtn.paused{background:var(--warn); color:#1a0f04;}
-  .preset{display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;}
-  .preset button{padding:5px 9px; font-size:11px; background:var(--panel2);
-    border:1px solid var(--border); color:var(--muted); border-radius:6px; cursor:pointer;}
-  .preset button:hover{border-color:var(--accent); color:var(--txt);}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .hint{font-size:11px; color:var(--muted); margin:-4px 0 12px;}
+
+  .btnrow{display:flex; gap:8px; margin-top:6px;}
+  .btn{flex:1; padding:9px; border:none; border-radius:7px; font-weight:600; cursor:pointer; font-size:13px;}
+  .btn.play{background:var(--accent2); color:#04140a;}
+  .btn.play.paused{background:var(--warn); color:#1a0f04;}
+  .btn.reset{background:var(--panel2); color:var(--txt); border:1px solid var(--border);}
+  .chk{display:flex; align-items:center; gap:7px; font-size:13px; color:var(--muted); margin-top:2px;}
+  .chk input{accent-color:var(--accent); width:16px; height:16px;}
 
   /* Metrics */
   .metrics{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
@@ -59,11 +61,11 @@
   .verdict.marginal{background:rgba(240,136,62,.15); border:1px solid var(--warn); color:var(--warn);}
   .verdict.unstable{background:rgba(248,81,73,.15); border:1px solid var(--danger); color:var(--danger);}
 
-  /* Plot grid */
+  /* Plots */
   .plots{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
   @media(max-width:1150px){.plots{grid-template-columns:1fr;}}
   .card{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:12px;}
-  .card h3{margin:0 0 8px; font-size:13px; color:var(--txt); display:flex; justify-content:space-between;}
+  .card h3{margin:0 0 8px; font-size:13px; display:flex; justify-content:space-between;}
   .card h3 .sub{color:var(--muted); font-weight:400; font-size:11px;}
   canvas{width:100%; display:block; background:var(--plot); border-radius:7px;}
   .legend{display:flex; gap:14px; flex-wrap:wrap; margin-top:8px; font-size:11px; color:var(--muted);}
@@ -75,72 +77,108 @@
 <body>
 <header>
   <h1>Spring–Mass–Damper · Interactive Stability Dashboard</h1>
-  <p>Second-order system <span class="eq">m·ẍ + c·ẋ + k·x = F(t)</span> &nbsp;·&nbsp; state-space, eigenvalue stability, step/free response &amp; phase portrait — solved live in your browser (RK4).</p>
+  <p>Second-order system <span class="eq">m·ẍ + c·ẋ + k·x = F(t)</span> — type or drag <b>any</b> parameter; eigenvalue stability, time response &amp; phase portrait update live (RK4, in-browser).</p>
 </header>
 
 <div class="wrap">
-  <!-- ============ LEFT: CONTROLS + METRICS ============ -->
+  <!-- ================= CONTROLS ================= -->
   <div>
     <div class="panel" style="margin-bottom:16px;">
-      <h2>Parameters</h2>
+      <h2>System</h2>
 
-      <div class="ctrl">
-        <label>Mass &nbsp;m <span class="val" id="mVal">1.00 kg</span></label>
-        <input type="range" id="m" min="0.2" max="5" step="0.05" value="1">
+      <div class="field">
+        <div class="top"><label>Mass &nbsp;m <span class="u">kg</span></label>
+          <input type="number" id="m_n" min="0.05" step="0.05" value="1"></div>
+        <input type="range" id="m_s" min="0.1" max="10" step="0.05" value="1">
       </div>
-      <div class="ctrl">
-        <label>Stiffness &nbsp;k <span class="val" id="kVal">25.0 N/m</span></label>
-        <input type="range" id="k" min="1" max="100" step="0.5" value="25">
-      </div>
-      <div class="ctrl">
-        <label>Damping ratio &nbsp;ζ <span class="val" id="zVal">0.30</span></label>
-        <input type="range" id="z" min="0" max="2.5" step="0.01" value="0.3">
+      <div class="field">
+        <div class="top"><label>Stiffness &nbsp;k <span class="u">N/m</span></label>
+          <input type="number" id="k_n" min="0.1" step="0.5" value="25"></div>
+        <input type="range" id="k_s" min="0.5" max="200" step="0.5" value="25">
       </div>
 
-      <div class="ctrl">
-        <label>Input</label>
+      <div class="field">
+        <div class="top"><label>Specify damping as</label></div>
+        <div class="seg" id="dampSeg">
+          <button data-d="zeta" class="active">ζ — ratio</button>
+          <button data-d="c">c — coefficient</button>
+        </div>
+      </div>
+
+      <div class="field" id="zetaField">
+        <div class="top"><label>Damping ratio &nbsp;ζ</label>
+          <input type="number" id="z_n" min="0" step="0.01" value="0.3"></div>
+        <input type="range" id="z_s" min="0" max="3" step="0.01" value="0.3">
+      </div>
+      <div class="field" id="cField" style="display:none;">
+        <div class="top"><label>Damping coeff &nbsp;c <span class="u">N·s/m</span></label>
+          <input type="number" id="c_n" min="0" step="0.1" value="3"></div>
+        <input type="range" id="c_s" min="0" max="80" step="0.1" value="3">
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:16px;">
+      <h2>Forcing &amp; initial conditions</h2>
+
+      <div class="field">
+        <div class="top"><label>Input type</label></div>
         <div class="seg" id="inputSeg">
-          <button data-mode="step" class="active">Unit step F=1</button>
-          <button data-mode="free">Free (initial cond.)</button>
+          <button data-mode="step" class="active">Step</button>
+          <button data-mode="free">Free</button>
+          <button data-mode="sine">Sine</button>
         </div>
       </div>
+      <div class="hint" id="modeHint">Step: constant force F applied at t=0.</div>
 
-      <div id="icBox" style="display:none;">
-        <div class="row2">
-          <div class="ctrl">
-            <label>x₀ <span class="val" id="x0Val">1.00</span></label>
-            <input type="range" id="x0" min="-2" max="2" step="0.05" value="1">
-          </div>
-          <div class="ctrl">
-            <label>v₀ <span class="val" id="v0Val">0.00</span></label>
-            <input type="range" id="v0" min="-5" max="5" step="0.1" value="0">
-          </div>
-        </div>
+      <div class="field" id="forceField">
+        <div class="top"><label>Force amplitude &nbsp;F <span class="u">N</span></label>
+          <input type="number" id="F_n" step="0.1" value="1"></div>
+        <input type="range" id="F_s" min="-5" max="5" step="0.1" value="1">
       </div>
 
-      <button class="playbtn" id="playBtn">⏸ Pause animation</button>
+      <div class="field" id="driveField" style="display:none;">
+        <div class="top"><label>Drive freq &nbsp;ω <span class="u">rad/s</span></label>
+          <input type="number" id="wd_n" min="0.1" step="0.1" value="5"></div>
+        <input type="range" id="wd_s" min="0.1" max="30" step="0.1" value="5">
+      </div>
 
-      <div style="margin-top:14px;">
-        <label style="font-size:12px; color:var(--muted);">Presets</label>
-        <div class="preset" id="presets">
-          <button data-z="0.1">Underdamped ζ=0.1</button>
-          <button data-z="0.3">ζ=0.3</button>
-          <button data-z="0.7">ζ=0.7</button>
-          <button data-z="1.0">Critical ζ=1.0</button>
-          <button data-z="2.0">Overdamped ζ=2.0</button>
-          <button data-z="0">Undamped ζ=0</button>
+      <div class="row2">
+        <div class="field">
+          <div class="top"><label>x₀ <span class="u">m</span></label>
+            <input type="number" id="x0_n" step="0.05" value="0"></div>
+          <input type="range" id="x0_s" min="-3" max="3" step="0.05" value="0">
         </div>
+        <div class="field">
+          <div class="top"><label>v₀ <span class="u">m/s</span></label>
+            <input type="number" id="v0_n" step="0.1" value="0"></div>
+          <input type="range" id="v0_s" min="-10" max="10" step="0.1" value="0">
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:16px;">
+      <h2>Simulation</h2>
+      <div class="field">
+        <div class="top"><label>Duration &nbsp;T <span class="u">s</span></label>
+          <input type="number" id="T_n" min="1" step="1" value="10"></div>
+        <input type="range" id="T_s" min="2" max="60" step="1" value="10">
+      </div>
+      <label class="chk"><input type="checkbox" id="autoT" checked> Auto-fit duration to the response</label>
+      <div class="btnrow">
+        <button class="btn play" id="playBtn">⏸ Pause</button>
+        <button class="btn reset" id="resetBtn">↺ Reset defaults</button>
       </div>
     </div>
 
     <div class="panel">
       <h2>Analysis</h2>
-      <div class="metrics" id="metrics">
+      <div class="metrics">
         <div class="verdict stable" id="verdict">—</div>
         <div class="metric"><div class="k">Natural freq ωₙ</div><div class="v" id="mWn">—</div></div>
         <div class="metric"><div class="k">Damped freq ωd</div><div class="v" id="mWd">—</div></div>
+        <div class="metric"><div class="k">Damping ratio ζ</div><div class="v" id="mZeta">—</div></div>
         <div class="metric"><div class="k">Damping coeff c</div><div class="v" id="mC">—</div></div>
-        <div class="metric"><div class="k">Regime</div><div class="v" id="mReg">—</div></div>
+        <div class="metric" style="grid-column:1/-1;"><div class="k">Regime</div><div class="v" id="mReg">—</div></div>
         <div class="metric" style="grid-column:1/-1;"><div class="k">Eigenvalues (poles) λ₁,₂</div><div class="v" id="mEig" style="font-size:13px;">—</div></div>
         <div class="metric"><div class="k">Settling time (2%)</div><div class="v" id="mTs">—</div></div>
         <div class="metric"><div class="k">% Overshoot</div><div class="v" id="mOs">—</div></div>
@@ -148,7 +186,7 @@
     </div>
   </div>
 
-  <!-- ============ RIGHT: PLOTS ============ -->
+  <!-- ================= PLOTS ================= -->
   <div>
     <div class="plots">
       <div class="card">
@@ -185,389 +223,309 @@
 </div>
 
 <footer>
-  Built for <b>Stability-Spring-Mass-System</b> · all computation runs client-side (RK4 integration + eigenvalue analysis). Matches the Python model: A = [[0, 1], [−k/m, −c/m]], c = 2ζωₙm.
+  Built for <b>Stability-Spring-Mass-System</b> · all computation runs client-side (RK4 integration + eigenvalue analysis). Model: A = [[0, 1], [−k/m, −c/m]], c = 2ζωₙm.
 </footer>
 
 <script>
 "use strict";
+const E = id => document.getElementById(id);
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
 
-/* =========================================================================
-   PHYSICS CORE  —  mirrors the Python state-space model exactly
-   m·ẍ + c·ẋ + k·x = F(t)
-   State X = [x, ẋ];   Ẋ = A·X + B·F ,  A = [[0,1],[-k/m,-c/m]]
-   ========================================================================= */
-
+/* ===================== PHYSICS CORE ===================== */
 function deriv(state, m, k, c, F){
   const [x, v] = state;
   return [v, (-k/m)*x - (c/m)*v + (1/m)*F];
 }
-
-// 4th-order Runge-Kutta integration of the state-space system.
 function integrate(m, k, c, force, X0, T, N){
   const dt = T/(N-1);
-  const t = new Array(N), x = new Array(N), v = new Array(N);
+  const t=new Array(N), x=new Array(N), v=new Array(N);
   let s = X0.slice();
   for(let i=0;i<N;i++){
     t[i]=i*dt; x[i]=s[0]; v[i]=s[1];
-    const F = force(t[i]);
-    const k1 = deriv(s, m,k,c,F);
-    const k2 = deriv([s[0]+0.5*dt*k1[0], s[1]+0.5*dt*k1[1]], m,k,c, force(t[i]+0.5*dt));
-    const k3 = deriv([s[0]+0.5*dt*k2[0], s[1]+0.5*dt*k2[1]], m,k,c, force(t[i]+0.5*dt));
-    const k4 = deriv([s[0]+dt*k3[0],     s[1]+dt*k3[1]],     m,k,c, force(t[i]+dt));
-    s = [ s[0] + dt/6*(k1[0]+2*k2[0]+2*k3[0]+k4[0]),
-          s[1] + dt/6*(k1[1]+2*k2[1]+2*k3[1]+k4[1]) ];
+    const k1=deriv(s,m,k,c,force(t[i]));
+    const k2=deriv([s[0]+0.5*dt*k1[0],s[1]+0.5*dt*k1[1]],m,k,c,force(t[i]+0.5*dt));
+    const k3=deriv([s[0]+0.5*dt*k2[0],s[1]+0.5*dt*k2[1]],m,k,c,force(t[i]+0.5*dt));
+    const k4=deriv([s[0]+dt*k3[0],s[1]+dt*k3[1]],m,k,c,force(t[i]+dt));
+    s=[ s[0]+dt/6*(k1[0]+2*k2[0]+2*k3[0]+k4[0]),
+        s[1]+dt/6*(k1[1]+2*k2[1]+2*k3[1]+k4[1]) ];
   }
   return {t,x,v};
 }
-
-// Everything derived from (m,k,ζ): eigenvalues, regime, response metrics.
 function analyze(m, k, zeta){
-  const wn = Math.sqrt(k/m);
-  const c  = 2*zeta*wn*m;
-  // Char. eq:  λ² + (c/m)λ + k/m = 0  →  λ = -ζωₙ ± ωₙ√(ζ²-1)
+  const wn=Math.sqrt(k/m), c=2*zeta*wn*m;
   let eig, regime, wd=0;
-  if(zeta < 1){
-    wd = wn*Math.sqrt(1-zeta*zeta);
-    eig = [{re:-zeta*wn, im:wd}, {re:-zeta*wn, im:-wd}];
-    regime = zeta===0 ? "Undamped" : "Underdamped";
-  } else if(Math.abs(zeta-1) < 1e-9){
-    eig = [{re:-wn, im:0}, {re:-wn, im:0}];
-    regime = "Critically damped";
-  } else {
-    const r = wn*Math.sqrt(zeta*zeta-1);
-    eig = [{re:-zeta*wn+r, im:0}, {re:-zeta*wn-r, im:0}];
-    regime = "Overdamped";
-  }
-  const maxRe = Math.max(eig[0].re, eig[1].re);
-  let stability;
-  if(maxRe < -1e-9) stability="stable";
-  else if(maxRe > 1e-9) stability="unstable";
-  else stability="marginal";
-
-  // Step-response performance metrics (underdamped formulas).
-  const ts = zeta>0 ? 4/(zeta*wn) : Infinity;          // 2% settling time
-  const os = (zeta>0 && zeta<1) ? 100*Math.exp(-zeta*Math.PI/Math.sqrt(1-zeta*zeta)) : 0;
-  return {wn, wd, c, eig, regime, stability, maxRe, ts, os};
+  if(zeta<1){ wd=wn*Math.sqrt(1-zeta*zeta);
+    eig=[{re:-zeta*wn,im:wd},{re:-zeta*wn,im:-wd}];
+    regime=zeta<=1e-9?"Undamped":"Underdamped";
+  } else if(Math.abs(zeta-1)<1e-9){
+    eig=[{re:-wn,im:0},{re:-wn,im:0}]; regime="Critically damped";
+  } else { const r=wn*Math.sqrt(zeta*zeta-1);
+    eig=[{re:-zeta*wn+r,im:0},{re:-zeta*wn-r,im:0}]; regime="Overdamped"; }
+  const maxRe=Math.max(eig[0].re,eig[1].re);
+  const stability = maxRe<-1e-9?"stable": maxRe>1e-9?"unstable":"marginal";
+  const ts = zeta>1e-9 ? 4/(zeta*wn) : Infinity;
+  const os = (zeta>1e-9 && zeta<1) ? 100*Math.exp(-zeta*Math.PI/Math.sqrt(1-zeta*zeta)) : 0;
+  return {wn,wd,c,eig,regime,stability,maxRe,ts,os};
 }
 
-/* =========================================================================
-   CANVAS HELPERS
-   ========================================================================= */
-
+/* ===================== CANVAS HELPERS ===================== */
 function fit(canvas){
-  const dpr = window.devicePixelRatio||1;
-  const w = canvas.clientWidth, h = canvas.clientHeight;
-  canvas.width = w*dpr; canvas.height = h*dpr;
-  const ctx = canvas.getContext('2d');
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-  return {ctx, w, h};
+  const dpr=window.devicePixelRatio||1, w=canvas.clientWidth, h=canvas.clientHeight;
+  canvas.width=w*dpr; canvas.height=h*dpr;
+  const ctx=canvas.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx,w,h};
 }
-
-// Build a coordinate mapper for a plot with given data ranges + pixel padding.
-function mapper(w,h, xmin,xmax, ymin,ymax, pad){
-  const L=pad.l, R=w-pad.r, T=pad.t, B=h-pad.b;
-  return {
-    L,R,T,B,
-    X: x => L + (x-xmin)/(xmax-xmin)*(R-L),
-    Y: y => B - (y-ymin)/(ymax-ymin)*(B-T)
-  };
+function mapper(w,h,xmin,xmax,ymin,ymax,pad){
+  const L=pad.l,R=w-pad.r,T=pad.t,B=h-pad.b;
+  return {L,R,T,B, X:x=>L+(x-xmin)/(xmax-xmin)*(R-L), Y:y=>B-(y-ymin)/(ymax-ymin)*(B-T)};
 }
-
-function axes(ctx, mp, xmin,xmax,ymin,ymax, xlab, ylab){
-  ctx.strokeStyle="#222b38"; ctx.lineWidth=1; ctx.fillStyle="#6e7681";
-  ctx.font="10px Consolas,monospace";
-  // gridlines (5 each)
+function axes(ctx,mp,xmin,xmax,ymin,ymax,xlab,ylab){
+  ctx.strokeStyle="#222b38"; ctx.lineWidth=1; ctx.fillStyle="#6e7681"; ctx.font="10px Consolas,monospace";
   for(let i=0;i<=5;i++){
-    const gx = xmin+(xmax-xmin)*i/5, px = mp.X(gx);
+    const gx=xmin+(xmax-xmin)*i/5, px=mp.X(gx);
     ctx.beginPath(); ctx.moveTo(px,mp.T); ctx.lineTo(px,mp.B); ctx.stroke();
-    ctx.textAlign="center"; ctx.fillText(fmt(gx), px, mp.B+13);
-    const gy = ymin+(ymax-ymin)*i/5, py = mp.Y(gy);
+    ctx.textAlign="center"; ctx.fillText(fmt(gx),px,mp.B+13);
+    const gy=ymin+(ymax-ymin)*i/5, py=mp.Y(gy);
     ctx.beginPath(); ctx.moveTo(mp.L,py); ctx.lineTo(mp.R,py); ctx.stroke();
-    ctx.textAlign="right"; ctx.fillText(fmt(gy), mp.L-5, py+3);
+    ctx.textAlign="right"; ctx.fillText(fmt(gy),mp.L-5,py+3);
   }
-  // zero axes
   ctx.strokeStyle="#3a4757"; ctx.lineWidth=1.2;
   if(ymin<0&&ymax>0){ctx.beginPath();ctx.moveTo(mp.L,mp.Y(0));ctx.lineTo(mp.R,mp.Y(0));ctx.stroke();}
   if(xmin<0&&xmax>0){ctx.beginPath();ctx.moveTo(mp.X(0),mp.T);ctx.lineTo(mp.X(0),mp.B);ctx.stroke();}
-  ctx.fillStyle="#9aa7b4"; ctx.font="11px sans-serif";
-  ctx.textAlign="center"; ctx.fillText(xlab,(mp.L+mp.R)/2, mp.B+26);
-  ctx.save(); ctx.translate(12,(mp.T+mp.B)/2); ctx.rotate(-Math.PI/2);
-  ctx.fillText(ylab,0,0); ctx.restore();
+  ctx.fillStyle="#9aa7b4"; ctx.font="11px sans-serif"; ctx.textAlign="center";
+  ctx.fillText(xlab,(mp.L+mp.R)/2,mp.B+26);
+  ctx.save(); ctx.translate(12,(mp.T+mp.B)/2); ctx.rotate(-Math.PI/2); ctx.fillText(ylab,0,0); ctx.restore();
 }
-
-function line(ctx, mp, xs, ys, color, width){
+function line(ctx,mp,xs,ys,color,width){
   ctx.strokeStyle=color; ctx.lineWidth=width||1.8; ctx.beginPath();
-  for(let i=0;i<xs.length;i++){ const px=mp.X(xs[i]), py=mp.Y(ys[i]);
-    if(i===0)ctx.moveTo(px,py); else ctx.lineTo(px,py); }
+  for(let i=0;i<xs.length;i++){const px=mp.X(xs[i]),py=mp.Y(ys[i]); i?ctx.lineTo(px,py):ctx.moveTo(px,py);}
   ctx.stroke();
 }
-
-function fmt(v){
-  if(v===0)return "0";
-  const a=Math.abs(v);
-  if(a>=100||a<0.01)return v.toExponential(1);
-  if(a>=10)return v.toFixed(1);
-  return v.toFixed(2);
-}
+function fmt(v){ if(v===0)return"0"; const a=Math.abs(v);
+  if(a>=100||a<0.01)return v.toExponential(1); if(a>=10)return v.toFixed(1); return v.toFixed(2); }
 function cplx(z){ return `${z.re.toFixed(2)} ${z.im>=0?'+':'−'} ${Math.abs(z.im).toFixed(2)}j`; }
 
-/* =========================================================================
-   STATE + ELEMENTS
-   ========================================================================= */
-const E = id => document.getElementById(id);
-const els = {
-  m:E('m'), k:E('k'), z:E('z'), x0:E('x0'), v0:E('v0'),
-  animC:E('animCanvas'), timeC:E('timeCanvas'), phaseC:E('phaseCanvas'),
-  poleC:E('poleCanvas'), bodeC:E('bodeCanvas')
-};
-let mode = "step";          // "step" | "free"
-let playing = true;
-let traj = null, info = null, params = null, T = 10;
-let animStart = performance.now();
+/* ===================== STATE ===================== */
+let dampMode="zeta", mode="step", playing=true;
+let traj=null, info=null, params=null, T=10;
+let animStart=performance.now(), lastIdx=0;
+const C={anim:E('animCanvas'),time:E('timeCanvas'),phase:E('phaseCanvas'),pole:E('poleCanvas'),bode:E('bodeCanvas')};
 
-/* =========================================================================
-   RECOMPUTE — called whenever a control changes
-   ========================================================================= */
+function num(id){ const v=parseFloat(E(id).value); return isFinite(v)?v:0; }
+
+/* keep a slider and its number box in sync, then recompute */
+function bind(sliderId,numId){
+  const s=E(sliderId), n=E(numId);
+  s.addEventListener('input',()=>{ n.value=s.value; recompute(); });
+  n.addEventListener('input',()=>{ s.value=clamp(+n.value,+s.min,+s.max); recompute(); });
+}
+
+/* ===================== RECOMPUTE ===================== */
 function recompute(){
-  const m=+els.m.value, k=+els.k.value, zeta=+els.z.value;
-  params = {m,k,zeta};
-  info = analyze(m,k,zeta);
+  const m=Math.max(0.05,num('m_n')), k=Math.max(0.1,num('k_n'));
+  const wn=Math.sqrt(k/m);
+  let zeta;
+  if(dampMode==="zeta"){ zeta=Math.max(0,num('z_n')); }
+  else { zeta = num('c_n')/(2*Math.sqrt(m*k)); }
 
-  // adaptive horizon: a few settling times, clamped — long for light damping
-  if(info.stability==="stable") T = Math.min(30, Math.max(6, info.ts*1.6));
-  else T = 12;
+  info=analyze(m,k,zeta);
+  const F=num('F_n');
+  params={m,k,zeta,F};
 
-  const force = mode==="step" ? (()=>1) : (()=>0);
-  const X0 = mode==="step" ? [0,0] : [+els.x0.value, +els.v0.value];
-  traj = integrate(m,k,info.c, force, X0, T, 1200);
+  // forcing function
+  let force;
+  if(mode==="step") force=()=>F;
+  else if(mode==="free") force=()=>0;
+  else { const wd=Math.max(0.01,num('wd_n')); force=t=>F*Math.sin(wd*t); }
+  const X0=[num('x0_n'), num('v0_n')];
 
-  // labels
-  E('mVal').textContent = m.toFixed(2)+" kg";
-  E('kVal').textContent = k.toFixed(1)+" N/m";
-  E('zVal').textContent = zeta.toFixed(2);
-  E('x0Val').textContent = (+els.x0.value).toFixed(2);
-  E('v0Val').textContent = (+els.v0.value).toFixed(2);
+  // simulation horizon
+  if(E('autoT').checked){
+    T = info.stability==="stable" ? clamp(info.ts*1.6,6,30) : 12;
+    E('T_n').value=T.toFixed(0); E('T_s').value=clamp(Math.round(T),2,60);
+  } else { T=Math.max(1,num('T_n')); }
+
+  traj=integrate(m,k,info.c,force,X0,T,1200);
+
+  // sync the *derived* damping field so both boxes always read true values
+  if(dampMode==="zeta"){ E('c_n').value=info.c.toFixed(2); E('c_s').value=clamp(info.c,0,80); }
+  else { E('z_n').value=zeta.toFixed(3); E('z_s').value=clamp(zeta,0,3); }
 
   // metrics
-  E('mWn').textContent = info.wn.toFixed(3)+" rad/s";
-  E('mWd').textContent = info.wd>0 ? info.wd.toFixed(3)+" rad/s" : "—";
-  E('mC').textContent  = info.c.toFixed(3)+" N·s/m";
-  E('mReg').textContent= info.regime;
-  E('mEig').textContent= info.eig[0].im===0
+  E('mWn').textContent=info.wn.toFixed(3)+" rad/s";
+  E('mWd').textContent=info.wd>0?info.wd.toFixed(3)+" rad/s":"—";
+  E('mZeta').textContent=zeta.toFixed(3);
+  E('mC').textContent=info.c.toFixed(3)+" N·s/m";
+  E('mReg').textContent=info.regime;
+  E('mEig').textContent=info.eig[0].im===0
         ? `${info.eig[0].re.toFixed(3)}, ${info.eig[1].re.toFixed(3)}`
         : `${cplx(info.eig[0])},  ${cplx(info.eig[1])}`;
-  E('mTs').textContent = isFinite(info.ts) ? info.ts.toFixed(2)+" s" : "∞ (no damping)";
-  E('mOs').textContent = info.os>0 ? info.os.toFixed(1)+" %" : "0 %";
+  E('mTs').textContent=isFinite(info.ts)?info.ts.toFixed(2)+" s":"∞ (no damping)";
+  E('mOs').textContent=info.os>0?info.os.toFixed(1)+" %":"0 %";
 
-  const v=E('verdict');
-  v.className = "verdict "+info.stability;
-  v.textContent = info.stability==="stable" ? "✓ Asymptotically stable"
-                : info.stability==="marginal" ? "≈ Marginally stable (ζ=0)"
-                : "✗ Unstable";
+  const v=E('verdict'); v.className="verdict "+info.stability;
+  v.textContent=info.stability==="stable"?"✓ Asymptotically stable"
+    :info.stability==="marginal"?"≈ Marginally stable (ζ=0)":"✗ Unstable";
 
   drawTime(); drawPhase(); drawPole(); drawBode();
 }
 
-/* ---------- Time response ---------- */
+/* ===================== PLOTS ===================== */
 function drawTime(){
-  const {ctx,w,h}=fit(els.timeC);
-  const xs=traj.x, vs=traj.v, ts=traj.t;
+  const {ctx,w,h}=fit(C.time); const xs=traj.x,vs=traj.v,ts=traj.t;
   let ymin=Math.min(0,...xs,...vs), ymax=Math.max(0,...xs,...vs);
-  const padv=(ymax-ymin)*0.1||0.1; ymin-=padv; ymax+=padv;
+  const p=(ymax-ymin)*0.1||0.1; ymin-=p; ymax+=p;
   const mp=mapper(w,h,0,T,ymin,ymax,{l:46,r:12,t:12,b:34});
   axes(ctx,mp,0,T,ymin,ymax,"time t (s)","amplitude");
-  if(mode==="step"){ const ss=1/params.k;
+  if(mode==="step"){ const ss=params.F/params.k;
     ctx.strokeStyle="#6e7681"; ctx.setLineDash([5,4]); ctx.lineWidth=1.2;
-    ctx.beginPath(); ctx.moveTo(mp.L,mp.Y(ss)); ctx.lineTo(mp.R,mp.Y(ss)); ctx.stroke();
-    ctx.setLineDash([]);
-  }
-  line(ctx,mp,ts,vs,"#3fb950",1.4);
-  line(ctx,mp,ts,xs,"#58a6ff",2);
+    ctx.beginPath(); ctx.moveTo(mp.L,mp.Y(ss)); ctx.lineTo(mp.R,mp.Y(ss)); ctx.stroke(); ctx.setLineDash([]);}
+  line(ctx,mp,ts,vs,"#3fb950",1.4); line(ctx,mp,ts,xs,"#58a6ff",2);
 }
-
-/* ---------- Phase portrait + vector field ---------- */
 function drawPhase(){
-  const {ctx,w,h}=fit(els.phaseC);
-  const xs=traj.x, vs=traj.v;
-  let xr=Math.max(0.05,...xs.map(Math.abs)), vr=Math.max(0.05,...vs.map(Math.abs));
-  xr*=1.2; vr*=1.2;
+  const {ctx,w,h}=fit(C.phase); const xs=traj.x,vs=traj.v;
+  let xr=Math.max(0.05,...xs.map(Math.abs))*1.2, vr=Math.max(0.05,...vs.map(Math.abs))*1.2;
   const mp=mapper(w,h,-xr,xr,-vr,vr,{l:50,r:12,t:12,b:34});
   axes(ctx,mp,-xr,xr,-vr,vr,"displacement x","velocity ẋ");
-  // vector field: arrows of (ẋ, -(k/m)x-(c/m)ẋ), direction only
-  ctx.strokeStyle="rgba(88,166,255,.25)";
-  const {m,k}=params, c=info.c, ng=11;
-  for(let i=1;i<ng;i++) for(let j=1;j<ng;j++){
+  const {m,k}=params,c=info.c,ng=11; ctx.strokeStyle="rgba(88,166,255,.25)";
+  for(let i=1;i<ng;i++)for(let j=1;j<ng;j++){
     const x=-xr+2*xr*i/ng, v=-vr+2*vr*j/ng;
-    let dx=v, dv=(-k/m)*x-(c/m)*v;
-    const mag=Math.hypot(dx,dv)||1; dx/=mag; dv/=mag;
-    const px=mp.X(x), py=mp.Y(v), len=9;
-    const ex=px+dx*len, ey=py-dv*len;
+    let dx=v, dv=(-k/m)*x-(c/m)*v; const mag=Math.hypot(dx,dv)||1; dx/=mag; dv/=mag;
+    const px=mp.X(x),py=mp.Y(v),ex=px+dx*9,ey=py-dv*9;
     ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(ex,ey); ctx.stroke();
     ctx.beginPath(); ctx.arc(ex,ey,1.4,0,7); ctx.fillStyle="rgba(88,166,255,.4)"; ctx.fill();
   }
   line(ctx,mp,xs,vs,"#f0883e",2);
-  // start + end markers
   ctx.fillStyle="#3fb950"; ctx.beginPath(); ctx.arc(mp.X(xs[0]),mp.Y(vs[0]),4,0,7); ctx.fill();
   ctx.fillStyle="#f85149"; ctx.beginPath(); ctx.arc(mp.X(xs.at(-1)),mp.Y(vs.at(-1)),4,0,7); ctx.fill();
 }
-
-/* ---------- Pole map (s-plane) ---------- */
 function drawPole(){
-  const {ctx,w,h}=fit(els.poleC);
-  const e=info.eig;
+  const {ctx,w,h}=fit(C.pole); const e=info.eig;
   const mags=e.map(z=>Math.hypot(z.re,z.im));
-  const R=Math.max(info.wn, ...mags, ...e.map(z=>Math.abs(z.im)), 1)*1.35;
+  const R=Math.max(info.wn,...mags,...e.map(z=>Math.abs(z.im)),1)*1.35;
   const mp=mapper(w,h,-R,R,-R,R,{l:50,r:14,t:12,b:34});
-  // shaded stable / unstable half-planes
   ctx.fillStyle="rgba(63,185,80,.07)"; ctx.fillRect(mp.L,mp.T,mp.X(0)-mp.L,mp.B-mp.T);
   ctx.fillStyle="rgba(248,81,73,.07)"; ctx.fillRect(mp.X(0),mp.T,mp.R-mp.X(0),mp.B-mp.T);
   axes(ctx,mp,-R,R,-R,R,"Real σ","Imaginary jω");
-  // ωn circle
   ctx.strokeStyle="rgba(154,167,180,.35)"; ctx.setLineDash([4,4]);
-  ctx.beginPath(); ctx.arc(mp.X(0),mp.Y(0), mp.X(info.wn)-mp.X(0),0,7); ctx.stroke();
-  ctx.setLineDash([]);
-  // poles
+  ctx.beginPath(); ctx.arc(mp.X(0),mp.Y(0),mp.X(info.wn)-mp.X(0),0,7); ctx.stroke(); ctx.setLineDash([]);
   for(const z of e){
     ctx.fillStyle="#58a6ff"; ctx.strokeStyle="#04121f"; ctx.lineWidth=1.5;
     ctx.beginPath(); ctx.arc(mp.X(z.re),mp.Y(z.im),6,0,7); ctx.fill(); ctx.stroke();
-    // draw an "x" marker style ring
-    ctx.strokeStyle="#cfe6ff"; ctx.lineWidth=1.2; ctx.beginPath();
-    ctx.arc(mp.X(z.re),mp.Y(z.im),9,0,7); ctx.stroke();
+    ctx.strokeStyle="#cfe6ff"; ctx.lineWidth=1.2;
+    ctx.beginPath(); ctx.arc(mp.X(z.re),mp.Y(z.im),9,0,7); ctx.stroke();
   }
 }
-
-/* ---------- Bode magnitude ---------- */
 function drawBode(){
-  const {ctx,w,h}=fit(els.bodeC);
-  const {m,k}=params, c=info.c, wn=info.wn;
-  const wmax=3*wn, NN=400;
-  const ws=[], mag=[];
-  for(let i=0;i<NN;i++){
-    const wv=0.05+wmax*i/(NN-1);
-    const re=k-m*wv*wv, im=c*wv;
-    mag.push(20*Math.log10(1/Math.hypot(re,im)));
-    ws.push(wv);
-  }
-  let ymin=Math.min(...mag), ymax=Math.max(...mag);
-  const padv=(ymax-ymin)*0.1||1; ymin-=padv; ymax+=padv;
+  const {ctx,w,h}=fit(C.bode); const {m,k}=params,c=info.c,wn=info.wn;
+  const wmax=3*wn,NN=400,ws=[],mag=[];
+  for(let i=0;i<NN;i++){ const wv=0.05+wmax*i/(NN-1);
+    mag.push(20*Math.log10(1/Math.hypot(k-m*wv*wv,c*wv))); ws.push(wv); }
+  let ymin=Math.min(...mag),ymax=Math.max(...mag); const p=(ymax-ymin)*0.1||1; ymin-=p; ymax+=p;
   const mp=mapper(w,h,0,wmax,ymin,ymax,{l:50,r:14,t:12,b:34});
   axes(ctx,mp,0,wmax,ymin,ymax,"frequency ω (rad/s)","|H| (dB)");
-  // ωn marker
   ctx.strokeStyle="rgba(154,167,180,.45)"; ctx.setLineDash([5,4]);
-  ctx.beginPath(); ctx.moveTo(mp.X(wn),mp.T); ctx.lineTo(mp.X(wn),mp.B); ctx.stroke();
-  ctx.setLineDash([]); ctx.fillStyle="#9aa7b4"; ctx.font="10px sans-serif"; ctx.textAlign="left";
-  ctx.fillText("ωₙ", mp.X(wn)+4, mp.T+12);
+  ctx.beginPath(); ctx.moveTo(mp.X(wn),mp.T); ctx.lineTo(mp.X(wn),mp.B); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle="#9aa7b4"; ctx.font="10px sans-serif"; ctx.textAlign="left"; ctx.fillText("ωₙ",mp.X(wn)+4,mp.T+12);
+  // mark sine drive frequency if active
+  if(mode==="sine"){ const wd=Math.max(0.01,num('wd_n')); if(wd<wmax){
+    ctx.strokeStyle="rgba(240,136,62,.7)"; ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.moveTo(mp.X(wd),mp.T); ctx.lineTo(mp.X(wd),mp.B); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle="#f0883e"; ctx.fillText("ω drive",mp.X(wd)+4,mp.T+24);}}
   line(ctx,mp,ws,mag,"#bc8cff",2);
 }
 
-/* ---------- Animated schematic ---------- */
+/* ===================== SCHEMATIC ANIMATION ===================== */
+function roundRect(ctx,x,y,wd,ht,r){ctx.beginPath();ctx.moveTo(x+r,y);
+  ctx.arcTo(x+wd,y,x+wd,y+ht,r);ctx.arcTo(x+wd,y+ht,x,y+ht,r);
+  ctx.arcTo(x,y+ht,x,y,r);ctx.arcTo(x,y,x+wd,y,r);ctx.closePath();}
 function drawAnim(){
-  const {ctx,w,h}=fit(els.animC);
-  ctx.clearRect(0,0,w,h);
-  const yMid=h/2;
-  // pick current x from trajectory by looping time
-  const xs=traj.x;
-  let cx=0;
-  if(playing){
-    const elapsed=((performance.now()-animStart)/1000)%T;
-    const idx=Math.min(xs.length-1, Math.floor(elapsed/T*xs.length));
-    cx=xs[idx];
-  } else { cx=xs[lastIdx]; }
-  // visual scaling
+  const {ctx,w,h}=fit(C.anim); ctx.clearRect(0,0,w,h); const yMid=h/2; const xs=traj.x;
+  let cx = xs[lastIdx];
   const amp=Math.max(0.05,...xs.map(Math.abs));
-  const eqX=w*0.42;                 // equilibrium pixel
-  const scale=(w*0.34)/amp;
-  const massX=eqX+cx*scale;
-  const wallX=40, massW=58, massH=58;
-
-  // wall
+  const eqX=w*0.42, scale=(w*0.34)/amp, massX=eqX+cx*scale, wallX=40, massW=58, massH=58;
   ctx.fillStyle="#3a4757"; ctx.fillRect(wallX-8,yMid-70,8,140);
-  for(let i=0;i<8;i++){ ctx.strokeStyle="#2a3340"; ctx.beginPath();
-    ctx.moveTo(wallX-8,yMid-70+i*20); ctx.lineTo(wallX-18,yMid-58+i*20); ctx.stroke(); }
-
-  // spring (zigzag) — wall to mass top half
-  const sy=yMid-20;
-  ctx.strokeStyle="#58a6ff"; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(wallX,sy);
-  const segs=14, sx0=wallX, sx1=massX-massW/2;
-  for(let i=0;i<=segs;i++){ const t=i/segs, px=sx0+(sx1-sx0)*t;
-    const py=sy+(i>0&&i<segs ? (i%2?-11:11):0); ctx.lineTo(px,py); }
+  for(let i=0;i<8;i++){ctx.strokeStyle="#2a3340";ctx.beginPath();
+    ctx.moveTo(wallX-8,yMid-70+i*20);ctx.lineTo(wallX-18,yMid-58+i*20);ctx.stroke();}
+  const sy=yMid-20; ctx.strokeStyle="#58a6ff"; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(wallX,sy);
+  const segs=14,sx1=massX-massW/2;
+  for(let i=0;i<=segs;i++){const t=i/segs,px=wallX+(sx1-wallX)*t,py=sy+(i>0&&i<segs?(i%2?-11:11):0);ctx.lineTo(px,py);}
   ctx.stroke();
-
-  // damper — wall to mass bottom half
-  const dy=yMid+22;
-  ctx.strokeStyle="#f0883e"; ctx.lineWidth=2;
-  const dMid=(wallX+ (massX-massW/2))/2;
-  ctx.beginPath(); ctx.moveTo(wallX,dy); ctx.lineTo(dMid+14,dy); ctx.stroke();           // rod
-  ctx.strokeRect(dMid-16,dy-13,30,26);                                                    // cylinder
-  ctx.fillStyle="rgba(240,136,62,.35)"; ctx.fillRect(dMid-14, dy-11, 16, 22);             // piston
-  ctx.beginPath(); ctx.moveTo(dMid+14,dy); ctx.lineTo(massX-massW/2,dy); ctx.stroke();     // rod to mass
-
-  // equilibrium dashed line
+  const dy=yMid+22,dMid=(wallX+sx1)/2; ctx.strokeStyle="#f0883e"; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(wallX,dy); ctx.lineTo(dMid+14,dy); ctx.stroke();
+  ctx.strokeRect(dMid-16,dy-13,30,26);
+  ctx.fillStyle="rgba(240,136,62,.35)"; ctx.fillRect(dMid-14,dy-11,16,22);
+  ctx.beginPath(); ctx.moveTo(dMid+14,dy); ctx.lineTo(sx1,dy); ctx.stroke();
   ctx.strokeStyle="rgba(110,118,129,.5)"; ctx.setLineDash([4,4]); ctx.lineWidth=1;
   ctx.beginPath(); ctx.moveTo(eqX,yMid-78); ctx.lineTo(eqX,yMid+78); ctx.stroke(); ctx.setLineDash([]);
-  ctx.fillStyle="#6e7681"; ctx.font="10px sans-serif"; ctx.textAlign="center";
-  ctx.fillText("equilibrium", eqX, yMid+92);
-
-  // mass
+  ctx.fillStyle="#6e7681"; ctx.font="10px sans-serif"; ctx.textAlign="center"; ctx.fillText("equilibrium",eqX,yMid+92);
   const grad=ctx.createLinearGradient(massX-massW/2,0,massX+massW/2,0);
   grad.addColorStop(0,"#2d6cdf"); grad.addColorStop(1,"#1b4fa8");
   ctx.fillStyle=grad; ctx.strokeStyle="#9ec5ff"; ctx.lineWidth=1.5;
   roundRect(ctx,massX-massW/2,yMid-massH/2,massW,massH,8); ctx.fill(); ctx.stroke();
-  ctx.fillStyle="#eaf2ff"; ctx.font="bold 13px sans-serif"; ctx.textAlign="center";
-  ctx.fillText("m", massX, yMid+5);
-
-  // displacement readout
-  ctx.fillStyle="#58a6ff"; ctx.font="11px Consolas,monospace";
-  ctx.fillText(`x = ${cx.toFixed(3)} m`, massX, yMid-massH/2-10);
+  ctx.fillStyle="#eaf2ff"; ctx.font="bold 13px sans-serif"; ctx.textAlign="center"; ctx.fillText("m",massX,yMid+5);
+  ctx.fillStyle="#58a6ff"; ctx.font="11px Consolas,monospace"; ctx.fillText(`x = ${cx.toFixed(3)} m`,massX,yMid-massH/2-10);
 }
-let lastIdx=0;
-function roundRect(ctx,x,y,wd,ht,r){
-  ctx.beginPath(); ctx.moveTo(x+r,y);
-  ctx.arcTo(x+wd,y,x+wd,y+ht,r); ctx.arcTo(x+wd,y+ht,x,y+ht,r);
-  ctx.arcTo(x,y+ht,x,y,r); ctx.arcTo(x,y,x+wd,y,r); ctx.closePath();
-}
-
-/* =========================================================================
-   ANIMATION LOOP
-   ========================================================================= */
 function loop(){
   if(traj){
-    if(playing){
-      const elapsed=((performance.now()-animStart)/1000)%T;
-      lastIdx=Math.min(traj.x.length-1, Math.floor(elapsed/T*traj.x.length));
-    }
+    if(playing){ const el=((performance.now()-animStart)/1000)%T;
+      lastIdx=Math.min(traj.x.length-1,Math.floor(el/T*traj.x.length)); }
     drawAnim();
   }
   requestAnimationFrame(loop);
 }
 
-/* =========================================================================
-   EVENTS
-   ========================================================================= */
-[els.m,els.k,els.z,els.x0,els.v0].forEach(el=>{
-  el.addEventListener('input',()=>{ animStart=performance.now(); recompute(); });
-});
-document.querySelectorAll('#inputSeg button').forEach(b=>{
-  b.addEventListener('click',()=>{
-    document.querySelectorAll('#inputSeg button').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active'); mode=b.dataset.mode;
-    E('icBox').style.display = mode==="free" ? "block":"none";
-    animStart=performance.now(); recompute();
-  });
-});
-document.querySelectorAll('#presets button').forEach(b=>{
-  b.addEventListener('click',()=>{ els.z.value=b.dataset.z; animStart=performance.now(); recompute(); });
-});
+/* ===================== EVENTS ===================== */
+[['m_s','m_n'],['k_s','k_n'],['z_s','z_n'],['c_s','c_n'],['F_s','F_n'],
+ ['wd_s','wd_n'],['x0_s','x0_n'],['v0_s','v0_n'],['T_s','T_n']].forEach(([s,n])=>bind(s,n));
+
+E('T_n').addEventListener('input',()=>{ E('autoT').checked=false; });
+E('T_s').addEventListener('input',()=>{ E('autoT').checked=false; });
+E('autoT').addEventListener('change',recompute);
+
+document.querySelectorAll('#dampSeg button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#dampSeg button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); dampMode=b.dataset.d;
+  E('zetaField').style.display = dampMode==="zeta"?"block":"none";
+  E('cField').style.display    = dampMode==="c"?"block":"none";
+  recompute();
+}));
+
+const hints={step:"Step: constant force F applied at t=0.",
+  free:"Free: no force — motion driven by x₀ and v₀ only.",
+  sine:"Sine: F·sin(ωt). Set ω near ωₙ to see resonance."};
+document.querySelectorAll('#inputSeg button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#inputSeg button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); mode=b.dataset.mode;
+  E('forceField').style.display = mode==="free"?"none":"block";
+  E('driveField').style.display = mode==="sine"?"block":"none";
+  E('modeHint').textContent=hints[mode];
+  animStart=performance.now(); recompute();
+}));
+
 E('playBtn').addEventListener('click',function(){
-  playing=!playing; this.textContent=playing?"⏸ Pause animation":"▶ Play animation";
-  this.classList.toggle('paused',!playing);
+  playing=!playing; this.textContent=playing?"⏸ Pause":"▶ Play"; this.classList.toggle('paused',!playing);
   if(playing) animStart=performance.now()-lastIdx/traj.x.length*T*1000;
 });
+
+const DEFAULTS={m_n:1,m_s:1,k_n:25,k_s:25,z_n:0.3,z_s:0.3,c_n:3,c_s:3,
+  F_n:1,F_s:1,wd_n:5,wd_s:5,x0_n:0,x0_s:0,v0_n:0,v0_s:0,T_n:10,T_s:10};
+E('resetBtn').addEventListener('click',()=>{
+  for(const id in DEFAULTS) E(id).value=DEFAULTS[id];
+  E('autoT').checked=true;
+  dampMode="zeta"; mode="step";
+  document.querySelectorAll('#dampSeg button').forEach(x=>x.classList.toggle('active',x.dataset.d==="zeta"));
+  document.querySelectorAll('#inputSeg button').forEach(x=>x.classList.toggle('active',x.dataset.mode==="step"));
+  E('zetaField').style.display="block"; E('cField').style.display="none";
+  E('forceField').style.display="block"; E('driveField').style.display="none";
+  E('modeHint').textContent=hints.step;
+  animStart=performance.now(); recompute();
+});
+
 window.addEventListener('resize',()=>{ if(traj){drawTime();drawPhase();drawPole();drawBode();} });
 
 /* boot */
-recompute();
-loop();
+recompute(); loop();
 </script>
 </body>
 </html>
