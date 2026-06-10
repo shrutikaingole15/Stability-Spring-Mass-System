@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spring-Mass-Damper — Interactive Stability Dashboard</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --border:#283040;
+    --txt:#e6edf3; --muted:#9aa7b4; --accent:#58a6ff; --accent2:#3fb950;
+    --warn:#f0883e; --danger:#f85149; --grid:#222b38; --plot:#0a0e14;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--txt);
+    font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+    font-size:14px; line-height:1.5;
+  }
+  header{
+    padding:18px 24px; border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,#11161f,#0d1117);
+  }
+  header h1{margin:0; font-size:20px; font-weight:600;}
+  header p{margin:4px 0 0; color:var(--muted); font-size:13px;}
+  .eq{color:var(--accent); font-family:"Cascadia Code",Consolas,monospace;}
+  .wrap{display:grid; grid-template-columns:300px 1fr; gap:16px; padding:16px; max-width:1500px; margin:0 auto;}
+  @media(max-width:900px){.wrap{grid-template-columns:1fr;}}
+
+  .panel{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px;}
+  .panel h2{margin:0 0 14px; font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted);}
+
+  /* Controls */
+  .ctrl{margin-bottom:18px;}
+  .ctrl label{display:flex; justify-content:space-between; margin-bottom:6px; font-weight:500;}
+  .ctrl label .val{color:var(--accent); font-family:Consolas,monospace;}
+  input[type=range]{width:100%; accent-color:var(--accent); cursor:pointer;}
+  .seg{display:flex; gap:6px; margin-top:6px;}
+  .seg button{
+    flex:1; padding:7px; background:var(--panel2); border:1px solid var(--border);
+    color:var(--muted); border-radius:7px; cursor:pointer; font-size:12px;
+  }
+  .seg button.active{background:var(--accent); color:#04121f; border-color:var(--accent); font-weight:600;}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .playbtn{width:100%; padding:9px; margin-top:6px; background:var(--accent2); color:#04140a;
+           border:none; border-radius:7px; font-weight:600; cursor:pointer; font-size:13px;}
+  .playbtn.paused{background:var(--warn); color:#1a0f04;}
+  .preset{display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;}
+  .preset button{padding:5px 9px; font-size:11px; background:var(--panel2);
+    border:1px solid var(--border); color:var(--muted); border-radius:6px; cursor:pointer;}
+  .preset button:hover{border-color:var(--accent); color:var(--txt);}
+
+  /* Metrics */
+  .metrics{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .metric{background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:9px 11px;}
+  .metric .k{font-size:11px; color:var(--muted);}
+  .metric .v{font-size:15px; font-weight:600; font-family:Consolas,monospace; margin-top:2px;}
+  .verdict{grid-column:1/-1; padding:11px; border-radius:8px; text-align:center; font-weight:600;}
+  .verdict.stable{background:rgba(63,185,80,.15); border:1px solid var(--accent2); color:var(--accent2);}
+  .verdict.marginal{background:rgba(240,136,62,.15); border:1px solid var(--warn); color:var(--warn);}
+  .verdict.unstable{background:rgba(248,81,73,.15); border:1px solid var(--danger); color:var(--danger);}
+
+  /* Plot grid */
+  .plots{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:1150px){.plots{grid-template-columns:1fr;}}
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:12px;}
+  .card h3{margin:0 0 8px; font-size:13px; color:var(--txt); display:flex; justify-content:space-between;}
+  .card h3 .sub{color:var(--muted); font-weight:400; font-size:11px;}
+  canvas{width:100%; display:block; background:var(--plot); border-radius:7px;}
+  .legend{display:flex; gap:14px; flex-wrap:wrap; margin-top:8px; font-size:11px; color:var(--muted);}
+  .legend span{display:inline-flex; align-items:center; gap:5px;}
+  .dot{width:10px; height:10px; border-radius:2px; display:inline-block;}
+  footer{padding:14px 24px; color:var(--muted); font-size:12px; border-top:1px solid var(--border); text-align:center;}
+</style>
+</head>
+<body>
+<header>
+  <h1>Spring–Mass–Damper · Interactive Stability Dashboard</h1>
+  <p>Second-order system <span class="eq">m·ẍ + c·ẋ + k·x = F(t)</span> &nbsp;·&nbsp; state-space, eigenvalue stability, step/free response &amp; phase portrait — solved live in your browser (RK4).</p>
+</header>
+
+<div class="wrap">
+  <!-- ============ LEFT: CONTROLS + METRICS ============ -->
+  <div>
+    <div class="panel" style="margin-bottom:16px;">
+      <h2>Parameters</h2>
+
+      <div class="ctrl">
+        <label>Mass &nbsp;m <span class="val" id="mVal">1.00 kg</span></label>
+        <input type="range" id="m" min="0.2" max="5" step="0.05" value="1">
+      </div>
+      <div class="ctrl">
+        <label>Stiffness &nbsp;k <span class="val" id="kVal">25.0 N/m</span></label>
+        <input type="range" id="k" min="1" max="100" step="0.5" value="25">
+      </div>
+      <div class="ctrl">
+        <label>Damping ratio &nbsp;ζ <span class="val" id="zVal">0.30</span></label>
+        <input type="range" id="z" min="0" max="2.5" step="0.01" value="0.3">
+      </div>
+
+      <div class="ctrl">
+        <label>Input</label>
+        <div class="seg" id="inputSeg">
+          <button data-mode="step" class="active">Unit step F=1</button>
+          <button data-mode="free">Free (initial cond.)</button>
+        </div>
+      </div>
+
+      <div id="icBox" style="display:none;">
+        <div class="row2">
+          <div class="ctrl">
+            <label>x₀ <span class="val" id="x0Val">1.00</span></label>
+            <input type="range" id="x0" min="-2" max="2" step="0.05" value="1">
+          </div>
+          <div class="ctrl">
+            <label>v₀ <span class="val" id="v0Val">0.00</span></label>
+            <input type="range" id="v0" min="-5" max="5" step="0.1" value="0">
+          </div>
+        </div>
+      </div>
+
+      <button class="playbtn" id="playBtn">⏸ Pause animation</button>
+
+      <div style="margin-top:14px;">
+        <label style="font-size:12px; color:var(--muted);">Presets</label>
+        <div class="preset" id="presets">
+          <button data-z="0.1">Underdamped ζ=0.1</button>
+          <button data-z="0.3">ζ=0.3</button>
+          <button data-z="0.7">ζ=0.7</button>
+          <button data-z="1.0">Critical ζ=1.0</button>
+          <button data-z="2.0">Overdamped ζ=2.0</button>
+          <button data-z="0">Undamped ζ=0</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Analysis</h2>
+      <div class="metrics" id="metrics">
+        <div class="verdict stable" id="verdict">—</div>
+        <div class="metric"><div class="k">Natural freq ωₙ</div><div class="v" id="mWn">—</div></div>
+        <div class="metric"><div class="k">Damped freq ωd</div><div class="v" id="mWd">—</div></div>
+        <div class="metric"><div class="k">Damping coeff c</div><div class="v" id="mC">—</div></div>
+        <div class="metric"><div class="k">Regime</div><div class="v" id="mReg">—</div></div>
+        <div class="metric" style="grid-column:1/-1;"><div class="k">Eigenvalues (poles) λ₁,₂</div><div class="v" id="mEig" style="font-size:13px;">—</div></div>
+        <div class="metric"><div class="k">Settling time (2%)</div><div class="v" id="mTs">—</div></div>
+        <div class="metric"><div class="k">% Overshoot</div><div class="v" id="mOs">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ RIGHT: PLOTS ============ -->
+  <div>
+    <div class="plots">
+      <div class="card">
+        <h3>Animated system <span class="sub">wall · spring · damper · mass</span></h3>
+        <canvas id="animCanvas" height="200"></canvas>
+      </div>
+      <div class="card">
+        <h3>Time response <span class="sub">x(t) and ẋ(t)</span></h3>
+        <canvas id="timeCanvas" height="200"></canvas>
+        <div class="legend">
+          <span><span class="dot" style="background:#58a6ff"></span>position x(t)</span>
+          <span><span class="dot" style="background:#3fb950"></span>velocity ẋ(t)</span>
+          <span><span class="dot" style="background:#6e7681"></span>steady state</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Phase portrait <span class="sub">ẋ vs x (with vector field)</span></h3>
+        <canvas id="phaseCanvas" height="240"></canvas>
+      </div>
+      <div class="card">
+        <h3>Pole map <span class="sub">eigenvalues in the complex s-plane</span></h3>
+        <canvas id="poleCanvas" height="240"></canvas>
+        <div class="legend">
+          <span><span class="dot" style="background:#3fb950"></span>stable region (Re&lt;0)</span>
+          <span><span class="dot" style="background:#f85149"></span>unstable region</span>
+        </div>
+      </div>
+      <div class="card" style="grid-column:1/-1;">
+        <h3>Frequency response <span class="sub">Bode magnitude |H(jω)| = 1/(k − mω² + jcω)</span></h3>
+        <canvas id="bodeCanvas" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Built for <b>Stability-Spring-Mass-System</b> · all computation runs client-side (RK4 integration + eigenvalue analysis). Matches the Python model: A = [[0, 1], [−k/m, −c/m]], c = 2ζωₙm.
+</footer>
+
+<script>
+"use strict";
+
+/* =========================================================================
+   PHYSICS CORE  —  mirrors the Python state-space model exactly
+   m·ẍ + c·ẋ + k·x = F(t)
+   State X = [x, ẋ];   Ẋ = A·X + B·F ,  A = [[0,1],[-k/m,-c/m]]
+   ========================================================================= */
+
+function deriv(state, m, k, c, F){
+  const [x, v] = state;
+  return [v, (-k/m)*x - (c/m)*v + (1/m)*F];
+}
+
+// 4th-order Runge-Kutta integration of the state-space system.
+function integrate(m, k, c, force, X0, T, N){
+  const dt = T/(N-1);
+  const t = new Array(N), x = new Array(N), v = new Array(N);
+  let s = X0.slice();
+  for(let i=0;i<N;i++){
+    t[i]=i*dt; x[i]=s[0]; v[i]=s[1];
+    const F = force(t[i]);
+    const k1 = deriv(s, m,k,c,F);
+    const k2 = deriv([s[0]+0.5*dt*k1[0], s[1]+0.5*dt*k1[1]], m,k,c, force(t[i]+0.5*dt));
+    const k3 = deriv([s[0]+0.5*dt*k2[0], s[1]+0.5*dt*k2[1]], m,k,c, force(t[i]+0.5*dt));
+    const k4 = deriv([s[0]+dt*k3[0],     s[1]+dt*k3[1]],     m,k,c, force(t[i]+dt));
+    s = [ s[0] + dt/6*(k1[0]+2*k2[0]+2*k3[0]+k4[0]),
+          s[1] + dt/6*(k1[1]+2*k2[1]+2*k3[1]+k4[1]) ];
+  }
+  return {t,x,v};
+}
+
+// Everything derived from (m,k,ζ): eigenvalues, regime, response metrics.
+function analyze(m, k, zeta){
+  const wn = Math.sqrt(k/m);
+  const c  = 2*zeta*wn*m;
+  // Char. eq:  λ² + (c/m)λ + k/m = 0  →  λ = -ζωₙ ± ωₙ√(ζ²-1)
+  let eig, regime, wd=0;
+  if(zeta < 1){
+    wd = wn*Math.sqrt(1-zeta*zeta);
+    eig = [{re:-zeta*wn, im:wd}, {re:-zeta*wn, im:-wd}];
+    regime = zeta===0 ? "Undamped" : "Underdamped";
+  } else if(Math.abs(zeta-1) < 1e-9){
+    eig = [{re:-wn, im:0}, {re:-wn, im:0}];
+    regime = "Critically damped";
+  } else {
+    const r = wn*Math.sqrt(zeta*zeta-1);
+    eig = [{re:-zeta*wn+r, im:0}, {re:-zeta*wn-r, im:0}];
+    regime = "Overdamped";
+  }
+  const maxRe = Math.max(eig[0].re, eig[1].re);
+  let stability;
+  if(maxRe < -1e-9) stability="stable";
+  else if(maxRe > 1e-9) stability="unstable";
+  else stability="marginal";
+
+  // Step-response performance metrics (underdamped formulas).
+  const ts = zeta>0 ? 4/(zeta*wn) : Infinity;          // 2% settling time
+  const os = (zeta>0 && zeta<1) ? 100*Math.exp(-zeta*Math.PI/Math.sqrt(1-zeta*zeta)) : 0;
+  return {wn, wd, c, eig, regime, stability, maxRe, ts, os};
+}
+
+/* =========================================================================
+   CANVAS HELPERS
+   ========================================================================= */
+
+function fit(canvas){
+  const dpr = window.devicePixelRatio||1;
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  canvas.width = w*dpr; canvas.height = h*dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx, w, h};
+}
+
+// Build a coordinate mapper for a plot with given data ranges + pixel padding.
+function mapper(w,h, xmin,xmax, ymin,ymax, pad){
+  const L=pad.l, R=w-pad.r, T=pad.t, B=h-pad.b;
+  return {
+    L,R,T,B,
+    X: x => L + (x-xmin)/(xmax-xmin)*(R-L),
+    Y: y => B - (y-ymin)/(ymax-ymin)*(B-T)
+  };
+}
+
+function axes(ctx, mp, xmin,xmax,ymin,ymax, xlab, ylab){
+  ctx.strokeStyle="#222b38"; ctx.lineWidth=1; ctx.fillStyle="#6e7681";
+  ctx.font="10px Consolas,monospace";
+  // gridlines (5 each)
+  for(let i=0;i<=5;i++){
+    const gx = xmin+(xmax-xmin)*i/5, px = mp.X(gx);
+    ctx.beginPath(); ctx.moveTo(px,mp.T); ctx.lineTo(px,mp.B); ctx.stroke();
+    ctx.textAlign="center"; ctx.fillText(fmt(gx), px, mp.B+13);
+    const gy = ymin+(ymax-ymin)*i/5, py = mp.Y(gy);
+    ctx.beginPath(); ctx.moveTo(mp.L,py); ctx.lineTo(mp.R,py); ctx.stroke();
+    ctx.textAlign="right"; ctx.fillText(fmt(gy), mp.L-5, py+3);
+  }
+  // zero axes
+  ctx.strokeStyle="#3a4757"; ctx.lineWidth=1.2;
+  if(ymin<0&&ymax>0){ctx.beginPath();ctx.moveTo(mp.L,mp.Y(0));ctx.lineTo(mp.R,mp.Y(0));ctx.stroke();}
+  if(xmin<0&&xmax>0){ctx.beginPath();ctx.moveTo(mp.X(0),mp.T);ctx.lineTo(mp.X(0),mp.B);ctx.stroke();}
+  ctx.fillStyle="#9aa7b4"; ctx.font="11px sans-serif";
+  ctx.textAlign="center"; ctx.fillText(xlab,(mp.L+mp.R)/2, mp.B+26);
+  ctx.save(); ctx.translate(12,(mp.T+mp.B)/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText(ylab,0,0); ctx.restore();
+}
+
+function line(ctx, mp, xs, ys, color, width){
+  ctx.strokeStyle=color; ctx.lineWidth=width||1.8; ctx.beginPath();
+  for(let i=0;i<xs.length;i++){ const px=mp.X(xs[i]), py=mp.Y(ys[i]);
+    if(i===0)ctx.moveTo(px,py); else ctx.lineTo(px,py); }
+  ctx.stroke();
+}
+
+function fmt(v){
+  if(v===0)return "0";
+  const a=Math.abs(v);
+  if(a>=100||a<0.01)return v.toExponential(1);
+  if(a>=10)return v.toFixed(1);
+  return v.toFixed(2);
+}
+function cplx(z){ return `${z.re.toFixed(2)} ${z.im>=0?'+':'−'} ${Math.abs(z.im).toFixed(2)}j`; }
+
+/* =========================================================================
+   STATE + ELEMENTS
+   ========================================================================= */
+const E = id => document.getElementById(id);
+const els = {
+  m:E('m'), k:E('k'), z:E('z'), x0:E('x0'), v0:E('v0'),
+  animC:E('animCanvas'), timeC:E('timeCanvas'), phaseC:E('phaseCanvas'),
+  poleC:E('poleCanvas'), bodeC:E('bodeCanvas')
+};
+let mode = "step";          // "step" | "free"
+let playing = true;
+let traj = null, info = null, params = null, T = 10;
+let animStart = performance.now();
+
+/* =========================================================================
+   RECOMPUTE — called whenever a control changes
+   ========================================================================= */
+function recompute(){
+  const m=+els.m.value, k=+els.k.value, zeta=+els.z.value;
+  params = {m,k,zeta};
+  info = analyze(m,k,zeta);
+
+  // adaptive horizon: a few settling times, clamped — long for light damping
+  if(info.stability==="stable") T = Math.min(30, Math.max(6, info.ts*1.6));
+  else T = 12;
+
+  const force = mode==="step" ? (()=>1) : (()=>0);
+  const X0 = mode==="step" ? [0,0] : [+els.x0.value, +els.v0.value];
+  traj = integrate(m,k,info.c, force, X0, T, 1200);
+
+  // labels
+  E('mVal').textContent = m.toFixed(2)+" kg";
+  E('kVal').textContent = k.toFixed(1)+" N/m";
+  E('zVal').textContent = zeta.toFixed(2);
+  E('x0Val').textContent = (+els.x0.value).toFixed(2);
+  E('v0Val').textContent = (+els.v0.value).toFixed(2);
+
+  // metrics
+  E('mWn').textContent = info.wn.toFixed(3)+" rad/s";
+  E('mWd').textContent = info.wd>0 ? info.wd.toFixed(3)+" rad/s" : "—";
+  E('mC').textContent  = info.c.toFixed(3)+" N·s/m";
+  E('mReg').textContent= info.regime;
+  E('mEig').textContent= info.eig[0].im===0
+        ? `${info.eig[0].re.toFixed(3)}, ${info.eig[1].re.toFixed(3)}`
+        : `${cplx(info.eig[0])},  ${cplx(info.eig[1])}`;
+  E('mTs').textContent = isFinite(info.ts) ? info.ts.toFixed(2)+" s" : "∞ (no damping)";
+  E('mOs').textContent = info.os>0 ? info.os.toFixed(1)+" %" : "0 %";
+
+  const v=E('verdict');
+  v.className = "verdict "+info.stability;
+  v.textContent = info.stability==="stable" ? "✓ Asymptotically stable"
+                : info.stability==="marginal" ? "≈ Marginally stable (ζ=0)"
+                : "✗ Unstable";
+
+  drawTime(); drawPhase(); drawPole(); drawBode();
+}
+
+/* ---------- Time response ---------- */
+function drawTime(){
+  const {ctx,w,h}=fit(els.timeC);
+  const xs=traj.x, vs=traj.v, ts=traj.t;
+  let ymin=Math.min(0,...xs,...vs), ymax=Math.max(0,...xs,...vs);
+  const padv=(ymax-ymin)*0.1||0.1; ymin-=padv; ymax+=padv;
+  const mp=mapper(w,h,0,T,ymin,ymax,{l:46,r:12,t:12,b:34});
+  axes(ctx,mp,0,T,ymin,ymax,"time t (s)","amplitude");
+  if(mode==="step"){ const ss=1/params.k;
+    ctx.strokeStyle="#6e7681"; ctx.setLineDash([5,4]); ctx.lineWidth=1.2;
+    ctx.beginPath(); ctx.moveTo(mp.L,mp.Y(ss)); ctx.lineTo(mp.R,mp.Y(ss)); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  line(ctx,mp,ts,vs,"#3fb950",1.4);
+  line(ctx,mp,ts,xs,"#58a6ff",2);
+}
+
+/* ---------- Phase portrait + vector field ---------- */
+function drawPhase(){
+  const {ctx,w,h}=fit(els.phaseC);
+  const xs=traj.x, vs=traj.v;
+  let xr=Math.max(0.05,...xs.map(Math.abs)), vr=Math.max(0.05,...vs.map(Math.abs));
+  xr*=1.2; vr*=1.2;
+  const mp=mapper(w,h,-xr,xr,-vr,vr,{l:50,r:12,t:12,b:34});
+  axes(ctx,mp,-xr,xr,-vr,vr,"displacement x","velocity ẋ");
+  // vector field: arrows of (ẋ, -(k/m)x-(c/m)ẋ), direction only
+  ctx.strokeStyle="rgba(88,166,255,.25)";
+  const {m,k}=params, c=info.c, ng=11;
+  for(let i=1;i<ng;i++) for(let j=1;j<ng;j++){
+    const x=-xr+2*xr*i/ng, v=-vr+2*vr*j/ng;
+    let dx=v, dv=(-k/m)*x-(c/m)*v;
+    const mag=Math.hypot(dx,dv)||1; dx/=mag; dv/=mag;
+    const px=mp.X(x), py=mp.Y(v), len=9;
+    const ex=px+dx*len, ey=py-dv*len;
+    ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(ex,ey); ctx.stroke();
+    ctx.beginPath(); ctx.arc(ex,ey,1.4,0,7); ctx.fillStyle="rgba(88,166,255,.4)"; ctx.fill();
+  }
+  line(ctx,mp,xs,vs,"#f0883e",2);
+  // start + end markers
+  ctx.fillStyle="#3fb950"; ctx.beginPath(); ctx.arc(mp.X(xs[0]),mp.Y(vs[0]),4,0,7); ctx.fill();
+  ctx.fillStyle="#f85149"; ctx.beginPath(); ctx.arc(mp.X(xs.at(-1)),mp.Y(vs.at(-1)),4,0,7); ctx.fill();
+}
+
+/* ---------- Pole map (s-plane) ---------- */
+function drawPole(){
+  const {ctx,w,h}=fit(els.poleC);
+  const e=info.eig;
+  const mags=e.map(z=>Math.hypot(z.re,z.im));
+  const R=Math.max(info.wn, ...mags, ...e.map(z=>Math.abs(z.im)), 1)*1.35;
+  const mp=mapper(w,h,-R,R,-R,R,{l:50,r:14,t:12,b:34});
+  // shaded stable / unstable half-planes
+  ctx.fillStyle="rgba(63,185,80,.07)"; ctx.fillRect(mp.L,mp.T,mp.X(0)-mp.L,mp.B-mp.T);
+  ctx.fillStyle="rgba(248,81,73,.07)"; ctx.fillRect(mp.X(0),mp.T,mp.R-mp.X(0),mp.B-mp.T);
+  axes(ctx,mp,-R,R,-R,R,"Real σ","Imaginary jω");
+  // ωn circle
+  ctx.strokeStyle="rgba(154,167,180,.35)"; ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.arc(mp.X(0),mp.Y(0), mp.X(info.wn)-mp.X(0),0,7); ctx.stroke();
+  ctx.setLineDash([]);
+  // poles
+  for(const z of e){
+    ctx.fillStyle="#58a6ff"; ctx.strokeStyle="#04121f"; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.arc(mp.X(z.re),mp.Y(z.im),6,0,7); ctx.fill(); ctx.stroke();
+    // draw an "x" marker style ring
+    ctx.strokeStyle="#cfe6ff"; ctx.lineWidth=1.2; ctx.beginPath();
+    ctx.arc(mp.X(z.re),mp.Y(z.im),9,0,7); ctx.stroke();
+  }
+}
+
+/* ---------- Bode magnitude ---------- */
+function drawBode(){
+  const {ctx,w,h}=fit(els.bodeC);
+  const {m,k}=params, c=info.c, wn=info.wn;
+  const wmax=3*wn, NN=400;
+  const ws=[], mag=[];
+  for(let i=0;i<NN;i++){
+    const wv=0.05+wmax*i/(NN-1);
+    const re=k-m*wv*wv, im=c*wv;
+    mag.push(20*Math.log10(1/Math.hypot(re,im)));
+    ws.push(wv);
+  }
+  let ymin=Math.min(...mag), ymax=Math.max(...mag);
+  const padv=(ymax-ymin)*0.1||1; ymin-=padv; ymax+=padv;
+  const mp=mapper(w,h,0,wmax,ymin,ymax,{l:50,r:14,t:12,b:34});
+  axes(ctx,mp,0,wmax,ymin,ymax,"frequency ω (rad/s)","|H| (dB)");
+  // ωn marker
+  ctx.strokeStyle="rgba(154,167,180,.45)"; ctx.setLineDash([5,4]);
+  ctx.beginPath(); ctx.moveTo(mp.X(wn),mp.T); ctx.lineTo(mp.X(wn),mp.B); ctx.stroke();
+  ctx.setLineDash([]); ctx.fillStyle="#9aa7b4"; ctx.font="10px sans-serif"; ctx.textAlign="left";
+  ctx.fillText("ωₙ", mp.X(wn)+4, mp.T+12);
+  line(ctx,mp,ws,mag,"#bc8cff",2);
+}
+
+/* ---------- Animated schematic ---------- */
+function drawAnim(){
+  const {ctx,w,h}=fit(els.animC);
+  ctx.clearRect(0,0,w,h);
+  const yMid=h/2;
+  // pick current x from trajectory by looping time
+  const xs=traj.x;
+  let cx=0;
+  if(playing){
+    const elapsed=((performance.now()-animStart)/1000)%T;
+    const idx=Math.min(xs.length-1, Math.floor(elapsed/T*xs.length));
+    cx=xs[idx];
+  } else { cx=xs[lastIdx]; }
+  // visual scaling
+  const amp=Math.max(0.05,...xs.map(Math.abs));
+  const eqX=w*0.42;                 // equilibrium pixel
+  const scale=(w*0.34)/amp;
+  const massX=eqX+cx*scale;
+  const wallX=40, massW=58, massH=58;
+
+  // wall
+  ctx.fillStyle="#3a4757"; ctx.fillRect(wallX-8,yMid-70,8,140);
+  for(let i=0;i<8;i++){ ctx.strokeStyle="#2a3340"; ctx.beginPath();
+    ctx.moveTo(wallX-8,yMid-70+i*20); ctx.lineTo(wallX-18,yMid-58+i*20); ctx.stroke(); }
+
+  // spring (zigzag) — wall to mass top half
+  const sy=yMid-20;
+  ctx.strokeStyle="#58a6ff"; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(wallX,sy);
+  const segs=14, sx0=wallX, sx1=massX-massW/2;
+  for(let i=0;i<=segs;i++){ const t=i/segs, px=sx0+(sx1-sx0)*t;
+    const py=sy+(i>0&&i<segs ? (i%2?-11:11):0); ctx.lineTo(px,py); }
+  ctx.stroke();
+
+  // damper — wall to mass bottom half
+  const dy=yMid+22;
+  ctx.strokeStyle="#f0883e"; ctx.lineWidth=2;
+  const dMid=(wallX+ (massX-massW/2))/2;
+  ctx.beginPath(); ctx.moveTo(wallX,dy); ctx.lineTo(dMid+14,dy); ctx.stroke();           // rod
+  ctx.strokeRect(dMid-16,dy-13,30,26);                                                    // cylinder
+  ctx.fillStyle="rgba(240,136,62,.35)"; ctx.fillRect(dMid-14, dy-11, 16, 22);             // piston
+  ctx.beginPath(); ctx.moveTo(dMid+14,dy); ctx.lineTo(massX-massW/2,dy); ctx.stroke();     // rod to mass
+
+  // equilibrium dashed line
+  ctx.strokeStyle="rgba(110,118,129,.5)"; ctx.setLineDash([4,4]); ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(eqX,yMid-78); ctx.lineTo(eqX,yMid+78); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle="#6e7681"; ctx.font="10px sans-serif"; ctx.textAlign="center";
+  ctx.fillText("equilibrium", eqX, yMid+92);
+
+  // mass
+  const grad=ctx.createLinearGradient(massX-massW/2,0,massX+massW/2,0);
+  grad.addColorStop(0,"#2d6cdf"); grad.addColorStop(1,"#1b4fa8");
+  ctx.fillStyle=grad; ctx.strokeStyle="#9ec5ff"; ctx.lineWidth=1.5;
+  roundRect(ctx,massX-massW/2,yMid-massH/2,massW,massH,8); ctx.fill(); ctx.stroke();
+  ctx.fillStyle="#eaf2ff"; ctx.font="bold 13px sans-serif"; ctx.textAlign="center";
+  ctx.fillText("m", massX, yMid+5);
+
+  // displacement readout
+  ctx.fillStyle="#58a6ff"; ctx.font="11px Consolas,monospace";
+  ctx.fillText(`x = ${cx.toFixed(3)} m`, massX, yMid-massH/2-10);
+}
+let lastIdx=0;
+function roundRect(ctx,x,y,wd,ht,r){
+  ctx.beginPath(); ctx.moveTo(x+r,y);
+  ctx.arcTo(x+wd,y,x+wd,y+ht,r); ctx.arcTo(x+wd,y+ht,x,y+ht,r);
+  ctx.arcTo(x,y+ht,x,y,r); ctx.arcTo(x,y,x+wd,y,r); ctx.closePath();
+}
+
+/* =========================================================================
+   ANIMATION LOOP
+   ========================================================================= */
+function loop(){
+  if(traj){
+    if(playing){
+      const elapsed=((performance.now()-animStart)/1000)%T;
+      lastIdx=Math.min(traj.x.length-1, Math.floor(elapsed/T*traj.x.length));
+    }
+    drawAnim();
+  }
+  requestAnimationFrame(loop);
+}
+
+/* =========================================================================
+   EVENTS
+   ========================================================================= */
+[els.m,els.k,els.z,els.x0,els.v0].forEach(el=>{
+  el.addEventListener('input',()=>{ animStart=performance.now(); recompute(); });
+});
+document.querySelectorAll('#inputSeg button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('#inputSeg button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active'); mode=b.dataset.mode;
+    E('icBox').style.display = mode==="free" ? "block":"none";
+    animStart=performance.now(); recompute();
+  });
+});
+document.querySelectorAll('#presets button').forEach(b=>{
+  b.addEventListener('click',()=>{ els.z.value=b.dataset.z; animStart=performance.now(); recompute(); });
+});
+E('playBtn').addEventListener('click',function(){
+  playing=!playing; this.textContent=playing?"⏸ Pause animation":"▶ Play animation";
+  this.classList.toggle('paused',!playing);
+  if(playing) animStart=performance.now()-lastIdx/traj.x.length*T*1000;
+});
+window.addEventListener('resize',()=>{ if(traj){drawTime();drawPhase();drawPole();drawBode();} });
+
+/* boot */
+recompute();
+loop();
+</script>
+</body>
+</html>
